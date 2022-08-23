@@ -1,4 +1,5 @@
 # Modules
+import random
 import sqlite3
 from flask import jsonify
 
@@ -49,4 +50,29 @@ def db_getfreetables(date, time):
                 reserved = True
         if not reserved:
             free_tables.append(table)
-    return free_tables
+    returnDict = {
+        "tag": date,
+        "uhrzeit": time,
+        "tables": free_tables
+    }
+    return returnDict
+
+
+def db_reservetable(date, time, tableid):
+    allReservations = db_getallreservationsontimestamp(date, time).get_json()
+    for reservation in allReservations:
+        if reservation["tischnummer"] == tableid:  # Es gibt zu dem Zeitpunkt bereits eine Reservierung mit der Tisch ID
+            print("Error: Tisch zu dieser Zeit bereits belegt.")
+    conn = sqlite3.connect("buchungssystem.sqlite")
+    conn.row_factory = dict_factory
+    print(f"Established connection to database")
+    print(f"Creating reservation on {date} {time} for table {tableid}")
+    cursor = conn.cursor()
+    query = f"""
+    INSERT INTO reservierungen
+    (reservierungsnummer,zeitpunkt,tischnummer,pin,storniert)
+    VALUES ('11','{date} {time}',{tableid},{random.randint(1000,9999)},'False')
+    """  # TODO: Reservierungsnummer entsprechend setzen.
+    cursor.execute(query)
+    conn.commit()
+    return "Success"
