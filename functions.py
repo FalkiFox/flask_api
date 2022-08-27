@@ -18,7 +18,17 @@ def db_getalltables():
     print(f"Established connection to database")
     print(f"Getting all tables")
     cursor = conn.cursor()
-    cursor.execute("SELECT tischnummer,anzahlPlaetze FROM tische")
+    cursor.execute("SELECT tischnummer, anzahlPlaetze FROM tische")
+    return jsonify(cursor.fetchall())
+
+
+def db_getlastreservationnumber():
+    conn = sqlite3.connect("buchungssystem.sqlite")
+    conn.row_factory = dict_factory
+    print(f"Established connection to database")
+    print(f"Getting last reservation")
+    cursor = conn.cursor()
+    cursor.execute("SELECT max(reservierungsnummer) FROM reservierungen")
     return jsonify(cursor.fetchall())
 
 
@@ -60,6 +70,9 @@ def db_getfreetables(date, time):
 
 def db_reservetable(date, time, tableid):
     allReservations = db_getallreservationsontimestamp(date, time).get_json()
+    lastReservation = db_getlastreservationnumber().get_json()
+
+    exit()
     for reservation in allReservations:
         if reservation["tischnummer"] == tableid:  # Es gibt zu dem Zeitpunkt bereits eine Reservierung mit der Tisch ID
             print("Error: Tisch zu dieser Zeit bereits belegt.")

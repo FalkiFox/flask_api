@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 # API Endpoints
 @app.route("/api/getAllTables/", methods=["GET"])
-def getalltable():
+def getalltables():
     return db_getalltables()
 
 
